@@ -1,0 +1,7 @@
+docker build -t zoltannagy34/vsas:latest .
+docker push zoltannagy34/vsas:latest
+
+// VPS
+cd vsas
+docker compose pull
+docker compose up -d

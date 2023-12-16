@@ -1,0 +1,43 @@
+body.dark-theme {
+    background-color: #212121;
+}
+
+section.dark-theme {
+    background-color: #212121;
+    color: #ffffff;
+}
+
+#about.dark-theme {
+    background-color: #212121;
+    color: #ffffff;
+}
+
+#about .content.dark-theme {
+    background-color: #212121;
+    color: #ffffff;
+}
+
+#about .text.dark-theme {
+    color: #ffffff;
+}
+
+.container.dark-theme {
+    background-color: #212121;
+    color: #ffffff;
+}
+
+form.dark-theme {
+    background-color: #212121;
+    color: #ffffff;
+}
+
+form.dark-theme label {
+    color: #ffffff;
+}
+
+form.dark-theme input[type="text"],
+form.dark-theme input[type="email"],
+form.dark-theme textarea {
+    background-color: #212121;
+    color: #ffffff;
+}
