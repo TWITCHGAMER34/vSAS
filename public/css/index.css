@@ -101,7 +101,6 @@ nav a:hover {
 header {
     background-image: url('https://cloudfront-us-east-2.images.arcpublishing.com/reuters/3ZOPYGVW3FMXPK37W7ACVFWENM.jpg');
     background-size: cover;
-    background-position: center -550px;
     background-repeat: no-repeat;
     background-attachment: fixed;
     height: 575px;

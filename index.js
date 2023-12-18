@@ -9,11 +9,24 @@ const upload = multer();
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
 
+const {
+    MAIL_HOST,
+    MAIL_PASS,
+    MAIL_PORT,
+    MAIL_USER,
+    MAIL_TO
+} = process.env;
+
 let transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: MAIL_HOST,
+    port: MAIL_PORT,
+    secure: false,
     auth: {
-        user: process.env.EMAIL,
-        pass: process.env.PASS,
+        user: MAIL_USER,
+        pass: MAIL_PASS
+    },
+    tls: {
+        rejectUnauthorized: false
     }
 });
 
@@ -30,17 +43,15 @@ app.get("/contact", (req, res) => {
 })
 
 app.post('/send-email', upload.none(), (req, res) => {
-    let mailOptions = {
-        from: process.env.EMAIL,
-        to: process.env.EMAIL,
+    const mailOptions = {
+        from: MAIL_USER,
+        to: MAIL_TO,
         subject: 'Contact Form Submission',
         text: `Name: ${req.body.name}\nEmail: ${req.body.email}\nMessage: ${req.body.message}`
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            return console.log(error);
-        }
+        if (error) return console.log(error);
         console.log('Message sent: %s', info.messageId);
     });
 
