@@ -25,6 +25,19 @@ p {
     padding: 0 20px;
 }
 
+.container p{
+    margin: 0;
+    color: black;
+}
+
+.container h1{
+    margin: 0;
+}
+
+#word-count{
+    color: black;
+}
+
 #alert {
     position: fixed;
     top: 50%;
@@ -78,6 +91,7 @@ form {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
     width: 100%;
     max-width: 500px;
+    margin-top: 50px;
 }
 
 form label {
@@ -98,6 +112,12 @@ form textarea {
     box-sizing: border-box;
     background-color: #ffffff;
     color: #000000;
+}
+
+form textarea{
+    min-height: 100px;
+    resize: vertical;
+    overflow: hidden;
 }
 
 form input[type="submit"] {

@@ -41,3 +41,11 @@ form.dark-theme textarea {
     background-color: #212121;
     color: #ffffff;
 }
+
+.dark.dark-theme{
+    color: white;
+}
+
+#word-count.dark-theme{
+    color: white;
+}

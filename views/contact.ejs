@@ -28,14 +28,15 @@
   <button id="close-alert">Close</button>
 </div>
 <div class="container">
-  <h1>Contact Us</h1>
-  <p>If you have any questions, please don't hesitate to send us a message. We aim to reply within 2 working days.</p>
     <form action="/send-email" method="POST" enctype="application/x-www-form-urlencoded">
+      <h1>Contact Us</h1>
+      <p class="dark">If you have any questions, please don't hesitate to send us a message. We aim to reply within 2 working days.</p>
       <label for="name">Name:</label><br>
       <input type="text" id="name" name="name"><br>
       <label for="email">Email:</label><br>
       <input type="email" id="email" name="email"><br>
       <label for="message">Message:</label><br>
+      <div id="word-count" style="text-align: right;">500 characters remaining</div>
       <textarea id="message" name="message"></textarea><br>
       <input type="submit" value="Submit">
     </form>
@@ -63,4 +64,7 @@
   </div>
 </footer>
 </body>
+<script>
+
+</script>
 </html>
