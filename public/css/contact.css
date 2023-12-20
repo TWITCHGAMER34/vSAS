@@ -116,7 +116,7 @@ form textarea {
 
 form textarea{
     min-height: 100px;
-    resize: vertical;
+    resize: none;
     overflow: hidden;
 }
 
