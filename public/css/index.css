@@ -104,7 +104,7 @@ header {
     background-repeat: no-repeat;
     background-attachment: fixed;
     height: 575px;
-    color: #fff;
+    color: #ffffff;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -115,11 +115,17 @@ header {
 header h1 {
     margin: 0;
     font-size: 2.5em;
+    background-color: #004B87;
+    padding: 10px;
+    border-radius: 10px;
 }
 
 header p {
     margin: 10px 0;
     font-size: 1.2em;
+    background-color: #004B87;
+    padding: 10px;
+    border-radius: 10px;
 }
 
 .cta-button {
@@ -245,6 +251,7 @@ footer {
     display: flex;
     align-items: center;
     gap: 10px;
+    justify-content: center;
 }
 
 .made-by img {
