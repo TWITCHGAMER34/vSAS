@@ -22,21 +22,3 @@ icon.addEventListener('click', function () {
     localStorage.setItem("theme", newTheme)
     changeTheme(newTheme);
 });
-
-const message = document.getElementById('message');
-const wordCount = document.getElementById('word-count');
-
-message.addEventListener('input', function(event) {
-    const numChars = this.value.length;
-    const remaining = 500 - numChars;
-    this.style.height = 'auto';
-    this.style.height = (this.scrollHeight) + 'px';
-
-    if (remaining < 0) {
-        event.preventDefault();
-        this.value = this.value.slice(0, 500);
-        wordCount.textContent = '0 characters remaining';
-    } else {
-        wordCount.textContent = `${remaining} characters remaining`;
-    }
-});

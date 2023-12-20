@@ -25,17 +25,25 @@ p {
     padding: 0 20px;
 }
 
-.container p{
+.container p {
     margin: 0;
     color: black;
 }
 
-.container h1{
+.container h1 {
     margin: 0;
 }
 
-#word-count{
+#word-count {
     color: black;
+    text-align: right;
+
+}
+
+.g-recaptcha {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
 }
 
 #alert {
@@ -73,7 +81,7 @@ p {
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 .container {
@@ -114,7 +122,7 @@ form textarea {
     color: #000000;
 }
 
-form textarea{
+form textarea {
     min-height: 100px;
     resize: none;
     overflow: hidden;

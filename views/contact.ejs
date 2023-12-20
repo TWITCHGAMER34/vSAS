@@ -1,56 +1,60 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Contact Us | Scandinavian Airlines Virtual</title>
-  <link rel="icon" type="image/x-icon" href="/img/favicon.png">
-  <link rel="stylesheet" href="/css/index.css">
-  <link rel="stylesheet" href="/css/contact.css">
-  <script src="/js/base/index.js" defer></script>
-  <link rel="stylesheet" href="/css/darktheme.css">
-  <script src="/js/theme-control/theme-control-contact.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Contact Us | Scandinavian Airlines Virtual</title>
+    <link rel="icon" type="image/x-icon" href="/img/favicon.png">
+    <link rel="stylesheet" href="/css/index.css">
+    <link rel="stylesheet" href="/css/contact.css">
+    <script src="/js/base/mailalertbox.js" defer></script>
+    <script src="/js/base/word-count.js"></script>
+    <link rel="stylesheet" href="/css/darktheme.css">
+    <script src="/js/theme-control/theme-control-contact.js" defer></script>
 
 </head>
 <body>
 <nav>
-  <img src="../img/logo.png" alt="SAS Virtual Logo" id="logo">
-  <ul>
-    <li><a href="/">Home</a></li>
-    <li><a href="/about">About us</a></li>
-    <i id="theme-icon" class="fas fa-moon"><img src="/img/dark-theme.svg" alt=""></i>
-  </ul>
+    <img src="../img/logo.png" alt="SAS Virtual Logo" id="logo">
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/about">About us</a></li>
+        <i id="theme-icon" class="fas fa-moon"><img src="/img/dark-theme.svg" alt=""></i>
+    </ul>
 </nav>
 <div id="alert" class="hidden">
-  <p>Your message has been sent successfully!</p>
-  <button id="close-alert">Close</button>
+    <p>Your message has been sent successfully!</p>
+    <button id="close-alert">Close</button>
 </div>
 <div class="container">
     <form action="/send-email" method="POST" enctype="application/x-www-form-urlencoded">
-      <h1>Contact Us</h1>
-      <p class="dark">If you have any questions, please don't hesitate to send us a message. We aim to reply within 2 working days.</p>
-      <label for="name">Name:</label><br>
-      <input type="text" id="name" name="name"><br>
-      <label for="email">Email:</label><br>
-      <input type="email" id="email" name="email"><br>
-      <label for="message">Message:</label><br>
-      <div id="word-count" style="text-align: right;">500 characters remaining</div>
-      <textarea id="message" name="message"></textarea><br>
-      <input type="submit" value="Submit">
+        <h1>Contact Us</h1>
+        <p class="dark">If you have any questions, please don't hesitate to send us a message. We aim to reply within 2
+            working days.</p>
+        <label for="name">Name:</label><br>
+        <input type="text" id="name" name="name" required><br>
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email" required><br>
+        <label id="mes" for="message">Message:</label><br>
+        <div id="word-count"><span id="number">500</span> characters remaining</div>
+        <textarea id="message" name="message" required></textarea><br>
+        <div class="g-recaptcha" data-sitekey="your-site-key"></div>
+        <input type="submit" value="Submit">
     </form>
 </div>
 <footer>
-  <div class="footer-content">
-    <div class="copyright">
-      <p>&copy; 2023 Scandinavian Airlines Virtual. All rights reserved.</p>
-      <div class="made-by">
-        <p>Made by Nagy_Zoltán34 | In cooperation with:</p>
-        <a href="https://discord.gg/zNpUf22Wxn" target="_blank"><img src="/img/ddcdb85fb0884cb9050f7028a59ae934.png" alt=""></a>
-      </div>
+    <div class="footer-content">
+        <div class="copyright">
+            <p>&copy; 2023 Scandinavian Airlines Virtual. All rights reserved.</p>
+            <div class="made-by">
+                <p>Made by Nagy_Zoltán34 | In cooperation with:</p>
+                <a href="https://discord.gg/zNpUf22Wxn" target="_blank"><img
+                            src="/img/ddcdb85fb0884cb9050f7028a59ae934.png" alt=""></a>
+            </div>
+        </div>
     </div>
-  </div>
 </footer>
 </body>
 <script>
