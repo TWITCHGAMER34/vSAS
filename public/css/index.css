@@ -215,35 +215,12 @@ footer {
     gap: 20px;
 }
 
-.about-foot, .links, .copyright {
+.copyright {
     margin-bottom: 20px;
 }
 
-.about-foot h3, .links h3 {
-    font-size: 1.5em;
-    margin-bottom: 10px;
-}
-
-.about-foot p, .links ul, .copyright p {
+.copyright p {
     font-size: 1.2em;
-}
-
-.links ul {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-}
-
-.links a {
-    color: #fff;
-    text-decoration: none;
-}
-
-.links a:hover {
-    text-decoration: underline;
 }
 
 .made-by {
