@@ -276,6 +276,15 @@ footer {
     form input[type="submit"] {
         width: 100%;
     }
+    nav img{
+        display: none;
+    }
+    nav ul{
+        justify-content: space-evenly;
+    }
+    #theme-icon{
+        display: none;
+    }
 }
 
 @media screen and (max-width: 400px) {
