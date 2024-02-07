@@ -3,32 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+          content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="og:title" content="Home | Scandinavian Airlines Virtual">
+    <meta name="og:url" content="https://sasvirtual.se/">
+        <meta name="description"
+          content="Scandinavian Airlines Virtual is a virtual airline for flight simulation enthusiasts. We offer a realistic and professional virtual aviation experience with a diverse fleet and global destinations. Start your virtual journey with us today.">
+    <meta name="og:description"
+          content="Scandinavian Airlines Virtual is a virtual airline for flight simulation enthusiasts. We offer a realistic and professional virtual aviation experience with a diverse fleet and global destinations. Start your virtual journey with us today.">
+    <meta name="keywords"
+          content="Scandinavian Airlines Virtual, Virtual Airline, Flight Simulation, Airline Schedules, Diverse Fleet, Global Destinations, Virtual, SAS, vSAS, SASvirtual">
+    <meta name="og:image" content="https://sasvirtual.se/img/logo.png">
+    <meta name="og:site_name" content="Scandinavian Airlines Virtual">
     <link rel="icon" type="image/x-icon" href="/img/favicon.png">
-    <title>Home | Scandinavian Airlines Virtual</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/index.css">
     <script src="/js/theme-control/theme-control.js" defer></script>
     <link rel="stylesheet" href="/css/darktheme.css">
     <script src="/js/animations/index-animation.js"></script>
     <link rel="stylesheet" href="/css/animation-index.css">
     <script src="/js/base/scroll.js" defer></script>
+    <title>Home | Scandinavian Airlines Virtual</title>
 </head>
 <body>
 <nav>
-    <img src="../img/logo.png"
-         alt="SAS Virtual Logo" id="logo">
+    <div class="row">
+        <img src="../img/logo_small.png"
+             alt="SAS Virtual Logo" id="logo">
+        <div class="burger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
     <ul>
         <li><a href="/about">About us</a></li>
         <li><a href="/contact">Contact Us</a></li>
-        <li><a href="https://vamsys.io/login/vsas">Login</a></li>
-        <i id="theme-icon" class="fas fa-moon"><img src="/img/dark-theme.svg" alt=""></i>
+        <% if (user) { %>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/logout">Logout</a></li>
+            <% if (user.role === "admin") { %>
+                <li><a href="/admin">Admin</a></li>
+            <% } %>
+        <% }else { %>
+            <li><a href="/register">Register</a></li>
+            <li><a href="/login">Login</a></li>
+        <% } %>
+        <li>
+            <img id="theme-icon" src="/img/dark-theme.svg" alt="">
+        </li>
     </ul>
-    <div class="burger">
-        <span></span>
-        <span></span>
-        <span></span>
-    </div>
 </nav>
 <header>
     <h1>Welcome to SAS Virtual</h1>
@@ -61,7 +87,8 @@
             <p>&copy; 2023 Scandinavian Airlines Virtual. All rights reserved.</p>
             <div class="made-by">
                 <p>Made by Nagy_Zoltán34 | In cooperation with:</p>
-                <a href="https://discord.gg/zNpUf22Wxn" target="_blank"><img src="/img/ddcdb85fb0884cb9050f7028a59ae934.png" alt=""></a>
+                <a href="https://discord.gg/zNpUf22Wxn" target="_blank"><img
+                            src="/img/ddcdb85fb0884cb9050f7028a59ae934.jpg" alt="Nagy_Zoltán34 Profile Picture"></a>
             </div>
         </div>
     </div>

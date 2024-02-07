@@ -49,3 +49,8 @@ form.dark-theme textarea {
 #word-count.dark-theme{
     color: white;
 }
+
+
+.dark-theme section h2 {
+    color: #56a5e4;
+}

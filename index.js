@@ -1,66 +1,221 @@
-const express = require('express');
-const multer = require('multer');
-const nodemailer = require('nodemailer');
-const axios = require('axios');
+const express = require("express");
+const multer = require("multer");
+const nodemailer = require("nodemailer");
+const expressSession = require("express-session");
+const FileStore = require("session-file-store")(expressSession);
+const bcrypt = require("bcryptjs");
+const bodyParser = require("body-parser");
+const sharp = require("sharp");
+const cors = require("cors");
 
-require('dotenv').config();
+require("dotenv").config();
 const app = express();
 
-const upload = multer();
-app.use(express.static('public'));
-app.set('view engine', 'ejs');
+app.use(express.static("public"));
+app.use(express.urlencoded({ extended: true }));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    credentials: true,
+  }),
+);
+app.use(
+  expressSession({
+    secret: "keyboard cat",
+    resave: false,
+    saveUninitialized: false,
+    store: new FileStore({}),
+    cookie: { maxAge: 3600000 },
+  }),
+);
+app.use(bodyParser.json());
+app.set("view engine", "ejs");
 
-const {
-    MAIL_HOST,
-    MAIL_PASS,
-    MAIL_PORT,
-    MAIL_USER,
-    MAIL_TO
-} = process.env;
+const filter = (req, file, cb) => {
+  if (file.mimetype.split("/")[0] === "image") {
+    cb(null, true);
+  } else {
+    cb(new Error("Only images are allowed!"));
+  }
+};
 
-let transporter = nodemailer.createTransport({
-    host: MAIL_HOST,
-    port: MAIL_PORT,
-    secure: false,
-    auth: {
-        user: MAIL_USER,
-        pass: MAIL_PASS
-    },
-    tls: {
-        rejectUnauthorized: false
-    }
+const storage = multer.memoryStorage();
+
+const upload = multer({ storage: storage, fileFilter: filter });
+
+const db = require("knex")({
+  client: "sqlite3",
+  connection: "./dev.sqlite3",
 });
 
-app.get("/", (req, res) => {
-    res.render("index")
-})
+function generateHashFilename(filename) {
+  const hash = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+  const end = filename.split(".").pop();
+  return `${hash}.${end}`;
+}
 
-app.get("/about", (req, res) => {
-    res.render("about")
-})
+const { MAIL_HOST, MAIL_PASS, MAIL_PORT, MAIL_USER, MAIL_TO } = process.env;
 
-app.get("/contact", (req, res) => {
-    res.render("contact")
-})
+let transporter = nodemailer.createTransport({
+  host: MAIL_HOST,
+  port: MAIL_PORT,
+  secure: false,
+  auth: {
+    user: MAIL_USER,
+    pass: MAIL_PASS,
+  },
+  tls: {
+    rejectUnauthorized: false,
+  },
+});
+app.get("/logout", (req, res) => {
+  req.session.destroy();
+  res.status(200).send();
+});
 
-app.post('/send-email', upload.none(), (req, res) => {
-    const mailOptions = {
-        from: MAIL_USER,
-        to: MAIL_TO,
-        subject: 'Contact Form Submission',
-        text: `Name: ${req.body.name}\nEmail: ${req.body.email}\nMessage: ${req.body.message}`
-    };
+app.get("/posts", async (req, res) => {
+  const posts =
+    await db.raw(`SELECT id, user_id, title, content, image_url, created_at, comments
+                      FROM posts
+                               LEFT JOIN (SELECT post_id,
+                                                 group_concat(json_object(
+                                                         'id', comments.id,
+                                                         'post_id', post_id,
+                                                         'user_id', user_id,
+                                                         'user',
+                                                         json_object('id', users.id, 'username', users.username),
+                                                         'message', message,
+                                                         'created_at', comments.created_at
+                                                              )) AS comments
+                                          FROM comments
+                                                   LEFT JOIN users ON comments.user_id = users.id
+                                          GROUP BY post_id) AS comments ON posts.id = comments.post_id`);
+  res.status(200).json(posts);
+});
 
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) return console.log(error);
-        console.log('Message sent: %s', info.messageId);
+app.get("/dashboard/profile", (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+  res.render("profile", { user: req.session.user });
+});
 
-        // Send confirmation email to the user
-        const confirmationMailOptions = {
-            from: MAIL_USER,
-            to: req.body.email, // User's email address
-            subject: 'Your message has been sent',
-            html: `
+app.get("/dashboard/flights", (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+  res.render("flights.ejs", { user: req.session.user });
+});
+
+app.get("/dashboard/profile/edit", (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+  res.render("edit", { user: req.session.user });
+});
+
+app.get("/admin", (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+  if (req.session.user.role !== "admin") return res.redirect("/");
+  res.render("admin");
+});
+
+app.get("/admin/users", async (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+  if (req.session.user.role !== "admin") return res.redirect("/");
+  const users = await db("users");
+  res.render("users", { users });
+});
+
+app.get("/admin/users/:id", async (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+  if (req.session.user.role !== "admin") return res.redirect("/");
+  const user = await db("users").where({ id: req.params.id }).first();
+  res.render("user", { user });
+});
+
+app.post("/post", upload.single("image"), async (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+  const { title, content } = req.body;
+  const fileName = generateHashFilename(req.file.originalname);
+  const path = `./public/uploads/${fileName}`;
+  await sharp(req.file.buffer).resize(500).jpeg().toFile(path);
+  await db("posts").insert({
+    user_id: req.session.user.id,
+    title,
+    content,
+    image_url: fileName,
+  });
+  res.redirect("/dashboard");
+});
+
+app.get("/auth", async (req, res) => {
+  if (!req.session.user) return res.status(200).json();
+  const user = await db("users").where({ id: req.session.user.id }).first();
+  res.json(user);
+});
+
+app.post("/comment", async (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+  const { comment, post_id } = req.body;
+  await db("comments").insert({
+    user_id: req.session.user.id,
+    post_id,
+    message: comment,
+  });
+  res.redirect("/dashboard");
+});
+
+app.post("/register", async (req, res) => {
+  const { username, email, password } = req.body;
+  if (!username || !email || !password)
+    return res.status(405).send("Username, email and password are required");
+  const prevUser = await db("users").where({ username }).first();
+  const currentUsers = await db("users").count("id as total").first();
+  if (prevUser) return res.status(405).send("Username already exists");
+  const salt = bcrypt.genSaltSync(10);
+  const hash = bcrypt.hashSync(password, salt);
+  db("users")
+    .insert({
+      username,
+      email,
+      role: currentUsers.total === 0 ? "admin" : "user",
+      password: hash,
+    })
+    .then(() => {
+      res.status(200).send("User registered successfully");
+    })
+    .catch((err) => {
+      res.status(500).send("An error occurred");
+    });
+});
+
+app.post("/login", async (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password)
+    return res.status(405).send("Username and password are required");
+  const user = await db("users").where({ username }).first();
+  if (!user) return res.status(403).send("User not found");
+
+  const validPassword = bcrypt.compareSync(password, user.password);
+  if (!validPassword)
+    return res.status(403).send("Username and password do not match");
+  req.session.user = user;
+  res.json(user);
+});
+
+app.post("/send-email", (req, res) => {
+  const mailOptions = {
+    from: MAIL_USER,
+    to: MAIL_TO,
+    subject: "Contact Form Submission",
+    text: `Name: ${req.body.name}\nEmail: ${req.body.email}\nMessage: ${req.body.message}`,
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) return console.log(error);
+    console.log("Message sent: %s", info.messageId);
+
+    // Send confirmation email to the user
+    const confirmationMailOptions = {
+      from: MAIL_USER,
+      to: req.body.email, // User's email address
+      subject: "Your message has been sent",
+      html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
             <h2 style="color: #4CAF50;">Thank you for contacting us!</h2>
             <p>Your message has been sent successfully. We will get back to you shortly.</p>
@@ -73,20 +228,47 @@ app.post('/send-email', upload.none(), (req, res) => {
             <img src="cid:logo" alt="">
         </div>
     `,
-            attachments: [{
-                filename: 'SASVirtual-mail.png',
-                path: __dirname + '/public/img/SASVirtual-mail.png', // Ensure this path is correct
-                cid: 'logo' // Same cid value as in the html img src
-            }]
-        };
+      attachments: [
+        {
+          filename: "SASVirtual-mail.png",
+          path: __dirname + "/public/img/SASVirtual-mail.png", // Ensure this path is correct
+          cid: "logo", // Same cid value as in the html img src
+        },
+      ],
+    };
 
-        transporter.sendMail(confirmationMailOptions, (error, info) => {
-            if (error) return console.log(error);
-            console.log('Confirmation message sent: %s', info.messageId);
-        });
+    transporter.sendMail(confirmationMailOptions, (error, info) => {
+      if (error) return console.log(error);
+      console.log("Confirmation message sent: %s", info.messageId);
     });
+  });
 
-    res.redirect('/contact');
+  res.redirect("/contact");
 });
 
-app.listen(3000, () => console.log('Server started... http://localhost:3000'));
+app.post("/dashboard/comments/delete", async (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+  const { id } = req.body;
+  const userId = req.session.user.id;
+  await db("comments").where({ id, user_id: userId }).delete();
+  res.redirect("/dashboard");
+});
+
+app.post("/dashboard/posts/delete", async (req, res) => {
+  if (!req.session.user) return res.redirect("/login");
+  const { id } = req.body;
+  const userId = req.session.user.id;
+  await db("posts").where({ id, user_id: userId }).delete();
+  res.redirect("/dashboard");
+});
+
+app.listen(3000, async () => {
+  console.log("Server started... http://localhost:3000");
+  db.raw("SELECT 1")
+    .then(() => {
+      console.log("Database connected");
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});

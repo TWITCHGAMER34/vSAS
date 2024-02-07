@@ -1,7 +1,7 @@
 section {
     padding: 40px;
     background-color: #ffffff;
-    margin: 20px 0;
+    /*margin: 20px 0;*/
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
     opacity: 0;
     transform: translateY(50px);
