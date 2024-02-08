@@ -7,6 +7,7 @@ const bcrypt = require("bcryptjs");
 const bodyParser = require("body-parser");
 const sharp = require("sharp");
 const cors = require("cors");
+const { v4: uuidv4 } = require("uuid");
 
 require("dotenv").config();
 const app = express();
@@ -131,16 +132,19 @@ app.get("/admin/users/:id", async (req, res) => {
 app.post("/post", upload.single("image"), async (req, res) => {
   if (!req.session.user) return res.redirect("/login");
   const { title, content } = req.body;
-  const fileName = generateHashFilename(req.file.originalname);
-  const path = `./public/uploads/${fileName}`;
-  await sharp(req.file.buffer).resize(500).jpeg().toFile(path);
+  let fileName = null;
+  if (req.file) {
+    fileName = generateHashFilename(req.file.originalname);
+    const path = `./public/uploads/${fileName}`;
+    await sharp(req.file.buffer).resize(500).jpeg().toFile(path);
+  }
   await db("posts").insert({
     user_id: req.session.user.id,
     title,
     content,
     image_url: fileName,
   });
-  res.redirect("/dashboard");
+  res.status(200).send("Post created successfully");
 });
 
 app.get("/auth", async (req, res) => {
@@ -160,6 +164,49 @@ app.post("/comment", async (req, res) => {
   res.redirect("/dashboard");
 });
 
+async function sendConfirmation(user, email) {
+  const token = uuidv4();
+  const mailOptions = {
+    from: MAIL_USER,
+    to: email,
+    subject: "Account Confirmation",
+    html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+            <h2 style="color: #4CAF50;">Welcome to SAS Virtual!</h2>
+            <p>Your account has been created successfully. Please click the link below to activate your account.</p>
+            <a href="${
+              process.env.FRONTEND_URL || "http://localhost:5173"
+            }/confirm/${token}">Activate Account</a>
+            <hr>
+            <p>Best regards,</p>
+            <p>SAS Virtual</p>
+        </div>
+    `,
+  };
+
+  await db("verification").insert({ user_id: user.id, code: token, email });
+
+  await transporter.sendMail(mailOptions, (error, info) => {
+    if (error) return console.log(error);
+    console.log("Confirmation message sent: %s", info.messageId);
+  });
+}
+
+app.get("/confirm/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const verification = await db("verification").where({ code: id }).first();
+    await db("users")
+      .where({ id: verification.user_id })
+      .update({ is_active: true });
+    await db("verification").where({ code: id }).delete();
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send("An error occurred");
+  }
+  res.status(200).send("Account activated successfully");
+});
+
 app.post("/register", async (req, res) => {
   const { username, email, password } = req.body;
   if (!username || !email || !password)
@@ -176,10 +223,13 @@ app.post("/register", async (req, res) => {
       role: currentUsers.total === 0 ? "admin" : "user",
       password: hash,
     })
-    .then(() => {
+    .returning("*")
+    .then(async (user) => {
+      await sendConfirmation(user[0], email);
       res.status(200).send("User registered successfully");
     })
-    .catch((err) => {
+    .catch((e) => {
+      console.log(e);
       res.status(500).send("An error occurred");
     });
 });
@@ -190,6 +240,7 @@ app.post("/login", async (req, res) => {
     return res.status(405).send("Username and password are required");
   const user = await db("users").where({ username }).first();
   if (!user) return res.status(403).send("User not found");
+  if (!user.is_active) return res.status(403).send("User is not active");
 
   const validPassword = bcrypt.compareSync(password, user.password);
   if (!validPassword)
@@ -198,7 +249,7 @@ app.post("/login", async (req, res) => {
   res.json(user);
 });
 
-app.post("/send-email", (req, res) => {
+app.post("/send-email", async (req, res) => {
   const mailOptions = {
     from: MAIL_USER,
     to: MAIL_TO,
@@ -206,7 +257,7 @@ app.post("/send-email", (req, res) => {
     text: `Name: ${req.body.name}\nEmail: ${req.body.email}\nMessage: ${req.body.message}`,
   };
 
-  transporter.sendMail(mailOptions, (error, info) => {
+  await transporter.sendMail(mailOptions, async (error, info) => {
     if (error) return console.log(error);
     console.log("Message sent: %s", info.messageId);
 
@@ -237,13 +288,20 @@ app.post("/send-email", (req, res) => {
       ],
     };
 
-    transporter.sendMail(confirmationMailOptions, (error, info) => {
-      if (error) return console.log(error);
-      console.log("Confirmation message sent: %s", info.messageId);
-    });
-  });
+    try {
+      await transporter.sendMail(confirmationMailOptions, (error, info) => {
+        if (error) {
+          return console.log(error);
+        }
+        console.log("Confirmation message sent: %s", info.messageId);
+      });
 
-  res.redirect("/contact");
+      res.status(200).send("Message sent successfully");
+    } catch (e) {
+      console.log(e);
+      res.status(500).send("An error occurred");
+    }
+  });
 });
 
 app.post("/dashboard/comments/delete", async (req, res) => {

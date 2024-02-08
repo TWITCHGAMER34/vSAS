@@ -3,3 +3,4 @@ node_modules
 .idea
 sessions
 *.sqlite3
+public/uploads/*

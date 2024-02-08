@@ -10,6 +10,7 @@ exports.up = function (knex) {
     table.string("email").unique().notNullable();
     table.string("password").notNullable();
     table.string("role");
+    table.boolean("is_active").defaultTo(false);
     table.date("created_at").defaultTo(knex.fn.now());
   });
 };
