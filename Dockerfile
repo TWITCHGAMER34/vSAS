@@ -2,12 +2,13 @@ FROM node:18-alpine
 
 RUN apk update && apk upgrade
 RUN apk add vim
-RUN npm install -g npm
+RUN npm install -g knex
 
 WORKDIR /usr/src/app
 
 COPY . /usr/src/app/
-RUN npm install
+RUN yarn install
+RUN yarn add sharp --ignore-engines
 
 EXPOSE 3000
-CMD [ "node", "index.js" ]
+CMD knex migrate:latest && yarn start

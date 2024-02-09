@@ -46,7 +46,7 @@ const upload = multer({ storage: storage, fileFilter: filter });
 
 const db = require("knex")({
   client: "sqlite3",
-  connection: "./dev.sqlite3",
+  connection: "./db/dev.sqlite3",
 });
 
 function generateHashFilename(filename) {
@@ -195,7 +195,11 @@ async function sendConfirmation(user, email) {
 app.get("/confirm/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const verification = await db("verification").where({ code: id }).first();
+    const verification = await db("verification")
+      .where({ code: id })
+      .returning("*")
+      .first();
+    if (!verification) return res.status(404).send("Verification not found");
     await db("users")
       .where({ id: verification.user_id })
       .update({ is_active: true });
@@ -320,7 +324,7 @@ app.post("/dashboard/posts/delete", async (req, res) => {
   res.redirect("/dashboard");
 });
 
-app.listen(3000, async () => {
+app.listen(process.env.PORT || 3000, async () => {
   console.log("Server started... http://localhost:3000");
   db.raw("SELECT 1")
     .then(() => {

@@ -1,5 +1,5 @@
-docker build -t zoltannagy34/vsas:latest .
-docker push zoltannagy34/vsas:latest
+docker build -t zoltannagy34/vsas-backend:v2 .
+docker push zoltannagy34/vsas-backend:v2
 
 // VPS
 cd vsas

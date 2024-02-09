@@ -1,0 +1,18 @@
+version: '3.7'
+
+services:
+  backend:
+    image: docker.io/zoltannagy34/vsas-backend:v2
+    ports:
+      - "3001:3001"
+    environment:
+      - "PORT=3001"
+      - "MAIL_HOST=mail.setilic.com"
+      - "MAIL_PORT=587"
+      - "MAIL_USER=no-reply@sasvirtual.se"
+      - "MAIL_PASS=rU9VpHvJcK"
+      - "MAIL_TO=support@sasvirtual.se"
+      - "FRONTEND_URL=http://localhost:3000"
+    volumes:
+      - ./uploads:/usr/src/app/public/uploads
+      - ./data-sources:/usr/src/app/db

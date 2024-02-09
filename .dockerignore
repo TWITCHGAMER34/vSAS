@@ -1,2 +1,6 @@
 node_modules
 deploy.txt
+dev.sqlite3
+db/*.sqlite3
+data-sources
+uploads
